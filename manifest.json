@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "updated": "2026-11-11",
+  "archive_base": "https://downloads.xiph.org/releases/opus",
+  "components": [
+    "opus",
+    "opusfile",
+    "libopusenc",
+    "opus-tools"
+  ],
+  "build_order": [
+    "opus",
+    "opusfile",
+    "libopusenc",
+    "opus-tools"
+  ],
+  "stable": {
+    "opus": {
+      "version": "1.6.1",
+      "repository": "https://gitlab.xiph.org/xiph/opus.git",
+      "tag": "v1.6.1",
+      "commit": "22244de5a79bd1d6d623c32e72bf1954b56235be",
+      "commit_date": "2026-01-13T20:16:34Z",
+      "archive_url": "https://downloads.xiph.org/releases/opus/opus-1.6.1.tar.gz",
+      "archive_sha256": "6ffcb593207be92584df15b32466ed64bbec99109f007c82205f0194572411a1"
+    },
+    "opusfile": {
+      "version": "0.12",
+      "repository": "https://gitlab.xiph.org/xiph/opusfile.git",
+      "tag": "v0.12",
+      "commit": "a55c164e9891a9326188b7d4d216ec9a88373739",
+      "commit_date": "2020-06-26T23:38:49Z",
+      "archive_url": "https://downloads.xiph.org/releases/opus/opusfile-0.12.tar.gz",
+      "archive_sha256": "118d8601c12dd6a44f52423e68ca9083cc9f2bfe72da7a8c1acb22a80ae3550b"
+    },
+    "libopusenc": {
+      "version": "0.3",
+      "repository": "https://gitlab.xiph.org/xiph/libopusenc.git",
+      "tag": "v0.3",
+      "commit": "0dba1bea736ab8bb811409dce80c994a00a2ced9",
+      "commit_date": "2025-12-14T17:00:00Z",
+      "archive_url": "https://downloads.xiph.org/releases/opus/libopusenc-0.3.tar.gz",
+      "archive_sha256": "f616d3aff9b2034547894ccb8ab56c36cf1a4acb0d922c5d7119f97bbe58642c"
+    },
+    "opus-tools": {
+      "version": "0.2",
+      "repository": "https://gitlab.xiph.org/xiph/opus-tools.git",
+      "tag": "v0.2",
+      "commit": "0c1337f57e5b87fd23421904303fed3e575ce354",
+      "commit_date": "2018-09-18T08:13:34Z",
+      "archive_url": "https://downloads.xiph.org/releases/opus/opus-tools-0.2.tar.gz",
+      "archive_sha256": "b4e56cb00d3e509acfba9a9b627ffd8273b876b4e2408642259f6da28fa0ff86"
+    }
+  },
+  "nightly": {
+    "opus": {
+      "repository": "https://gitlab.xiph.org/xiph/opus.git",
+      "branch": "main"
+    },
+    "opusfile": {
+      "repository": "https://gitlab.xiph.org/xiph/opusfile.git",
+      "branch": "main"
+    },
+    "libopusenc": {
+      "repository": "https://gitlab.xiph.org/xiph/libopusenc.git",
+      "branch": "master"
+    },
+    "opus-tools": {
+      "repository": "https://gitlab.xiph.org/xiph/opus-tools.git",
+      "branch": "master"
+    }
+  }
+}

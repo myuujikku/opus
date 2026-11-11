@@ -1,0 +1,6 @@
+# Keep shell scripts and workflow files LF on Windows checkouts so bash and
+# GitHub Actions never see CRLF line endings.
+* text=auto
+*.sh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf

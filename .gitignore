@@ -1,0 +1,4 @@
+# Local build and CI outputs
+/build/
+/build-logs/
+/dist/

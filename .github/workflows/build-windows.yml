@@ -1,0 +1,146 @@
+name: Build Opus for Windows x64 (UCRT64)
+
+# Builds opus, opusfile, libopusenc and opus-tools as Windows x64 binaries in
+# MSYS2 UCRT64. Two source modes:
+#   stable  - verified official release tarballs pinned in manifest.json
+#   nightly - full clones of the canonical upstream default branches
+#
+# No GitHub Release is published. Download the zip from the run's Artifacts.
+
+on:
+  workflow_dispatch:
+    inputs:
+      source:
+        description: "Source mode: stable pinned releases or nightly upstream HEAD"
+        type: choice
+        options:
+          - stable
+          - nightly
+        default: stable
+      opus_version:
+        description: "Stable only: opus version override (empty = manifest pin)"
+        required: false
+        default: ""
+      opus_sha256:
+        description: "Stable only: SHA-256 for the opus override"
+        required: false
+        default: ""
+      opusfile_version:
+        description: "Stable only: opusfile version override (empty = manifest pin)"
+        required: false
+        default: ""
+      opusfile_sha256:
+        description: "Stable only: SHA-256 for the opusfile override"
+        required: false
+        default: ""
+      libopusenc_version:
+        description: "Stable only: libopusenc version override (empty = manifest pin)"
+        required: false
+        default: ""
+      libopusenc_sha256:
+        description: "Stable only: SHA-256 for the libopusenc override"
+        required: false
+        default: ""
+      opus_tools_version:
+        description: "Stable only: opus-tools version override (empty = manifest pin)"
+        required: false
+        default: ""
+      opus_tools_sha256:
+        description: "Stable only: SHA-256 for the opus-tools override"
+        required: false
+        default: ""
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.source || 'stable' }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Windows x64 UCRT64 (${{ inputs.source || 'stable' }})
+    runs-on: windows-latest
+    timeout-minutes: 60
+    env:
+      BUILD_MODE: ${{ inputs.source || 'stable' }}
+      ARTIFACT_NAME: ${{ inputs.source == 'nightly' && 'opus-windows-x64-ucrt64-nightly' || 'opus-windows-x64-ucrt64' }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up MSYS2 (UCRT64)
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-pkgconf
+            mingw-w64-ucrt-x86_64-libogg
+            mingw-w64-ucrt-x86_64-flac
+            mingw-w64-ucrt-x86_64-ntldd
+            autotools
+            autoconf-archive
+            git
+            jq
+            make
+            zip
+            curl
+            tar
+
+      - name: Build, package, and smoke test
+        shell: msys2 {0}
+        env:
+          # Empty stable inputs fall back to manifest.json.
+          # Nightly mode rejects any version/checksum override.
+          OPUS_VERSION: ${{ inputs.opus_version }}
+          OPUS_SHA256: ${{ inputs.opus_sha256 }}
+          OPUSFILE_VERSION: ${{ inputs.opusfile_version }}
+          OPUSFILE_SHA256: ${{ inputs.opusfile_sha256 }}
+          LIBOPUSENC_VERSION: ${{ inputs.libopusenc_version }}
+          LIBOPUSENC_SHA256: ${{ inputs.libopusenc_sha256 }}
+          OPUS_TOOLS_VERSION: ${{ inputs.opus_tools_version }}
+          OPUS_TOOLS_SHA256: ${{ inputs.opus_tools_sha256 }}
+          # Keep these paths in sync with the upload-artifact paths below.
+          LOG_DIR: build-logs
+          BUILD_DIR: build
+          DIST_DIR: dist
+        run: bash scripts/build-windows.sh
+
+      - name: Upload build logs (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}-logs
+          # Per-step logs plus captured configure/CMake diagnostics.
+          # build-logs/nightly-commits.log records exact nightly HEADs.
+          path: |
+            build-logs/
+            build/**/config.log
+            build/**/CMakeCache.txt
+            build/**/CMakeFiles/CMakeConfigureLog.yaml
+            build/**/CMakeFiles/CMakeOutput.log
+            build/**/CMakeFiles/CMakeError.log
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload Windows binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: |
+            dist/*.zip
+            dist/*-manifest.json
+            dist/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 30
